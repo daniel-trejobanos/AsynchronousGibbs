@@ -1,3 +1,20 @@
+/*
+ * Based on the matlab code for which I reproduce the heading:
+ * 
+ * References:
+ %   [1] Mohsen Pourahmadi and Xiao Wang,
+ %       Distribution of random correlation matrices: Hyperspherical parameterization of the Cholesky factor,
+ %       Statistics & Probability Letters, Volume 106, November 2015, Pages 5-12
+ %
+ %   [2] Enes Makalic and Daniel F. Schmidt,
+ %       An efficient algorithm for sampling from $\sin^k(x)$ for generating random correlation matrices
+ %       arxiv, 2018
+ % 
+ %   
+ * 
+ * 
+ */
+
 #include <Rcpp.h>
 #include <RcppEigen.h>
 // [[Rcpp::depends(RcppEigen)]]
@@ -76,50 +93,4 @@ MatrixXf generateRandomCor(unsigned int p){
 }
 
 
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically 
-// run after the compilation.
-//
 
-/*** R
-set.seed(123)
-#D<-generateRandomCor(5)
-Lc <- generateRandomCor(5)
-
-# lets try to generate  then theta matrix ourselves
-
-generate_theta <- function( k){
-  N= length(k)
-  logconst = 2 * log(pi/ 2);
-  accept = rep(FALSE,N)
-  x = rep(NA,N);
-  while( !all(accept)){
-    iX = !accept
-    g1 =  rgamma(sum(iX),shape = k[iX]+1,scale=1)
-    g2 = rgamma(sum(iX),shape = k[iX]+1,scale=1)
-      
-    x[iX] = pi *(g1/(g1+g2))
-   
-    accept[iX] = log(runif(n = sum(iX)))/k[iX]  < logconst + log(sin(x[iX])) - log(x[iX]) - log(pi - x[iX]) ;
-  }
-  x
-}
-theta <- matrix(rep(0,5^2),ncol=5) 
-#theta <-D 
-p=5
-e <- rep(1,5)
-for (j in 1:(p-1)){
-#  theta[(j+1):p,j] = generate_theta( (p-j)*e[(j+1):p] );
-}
-L = matrix(rep(1,p^2),ncol=p)
-for( i in 2:p){
-   L[i,2:i] = base::cumprod( sin(theta[i,1:i-1]) );
-}
-cosL <- cos(theta)
-cosL[upper.tri(cosL)] <-0
-L <- L*cosL
-
-C = L%*%t(L);
-print(C)
-
-  */
