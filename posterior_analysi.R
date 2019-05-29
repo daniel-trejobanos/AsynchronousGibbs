@@ -80,7 +80,7 @@ betas <- as.matrix(autocor.beta)
 ##still to do neff 
 coda::effectiveSize(chains.sigma)
 hist(coda::effectiveSize(chains.beta))
-temp<-sbc(X,num.params = MT+2,sbc.sweeps = 10,init.thin = 1,posterior.draws = 10000,max.thin = 10,target.neff = 80000)
+temp<-sbc(X,num.params = MT+2,sbc.sweeps = 10,init.thin = 1,posterior.draws = 10000,max.thin = 10,target.neff = 8000)
 
 
 
