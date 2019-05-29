@@ -1,10 +1,15 @@
 #for bayesR still to do, add pi vector, for this function I still have to check whats up with the prior and the neff, but for now lets just try
 sbc <- function(X,num.params,sbc.sweeps,init.thin,posterior.draws,max.thin,target.neff){
-  ranks <- matrix(nrow = sbc.sweeps, ncol = num.params)
+  #ranks <- matrix(nrow = sbc.sweeps, ncol = num.params)
   thins <- rep(NA, sbc.sweeps)
-  for( n in  1:sbc.sweeps){
+  library(parallel)
+  library(foreach)
+  library(doParallel) 
+  registerDoParallel(20)
+  ranks <- foreach( n =  1:sbc.sweeps,.combine=rbind) %dopar% {
     n_eff <- 0
     thin <- init.thin
+    b<- rep (0,ncol(X))
     while(TRUE){
       sigma0=0.01# prior  variance of a zero mean gaussian prior over the mean mu NOT IMPLEMENTED YET
       v0E= 7 # degrees of freedom over the inv scaled chi square prior over residuals variance
@@ -18,7 +23,6 @@ sbc <- function(X,num.params,sbc.sweeps,init.thin,posterior.draws,max.thin,targe
       sigmaG <- geoR::rinvchisq(1,v0G,s02G)
       print(sigmaG)
       pi <- MCMCpack::rdirichlet(1,alpha=rep(1,ncol(cva)+1) )
-      b <- rep(0,MT)
       print(length(pi))
       b <- sapply(b,FUN = function(x){ comp <- sample(c(0,cva[1,]),size = 1,replace = F,prob = pi)
       
@@ -41,12 +45,15 @@ sbc <- function(X,num.params,sbc.sweeps,init.thin,posterior.draws,max.thin,targe
     }
     thins[n] <- thin
     ##for now without the pi
-    params <- param.family(C1,"sigma|beta")
+    params <- param.family(C,"sigma|beta")
     param.vector <- c(b,sigmaE,sigmaG)
-    ranks.n <-  apply(params,MARGIN = 2, function(x){ 1 + sum(x <  param.vector)})
-    print(length(ranks.n))
-    print(dim(ranks))
-    ranks[n,] <-ranks.n
+    #print(param.vector)
+    #print(dim(params))
+    ranks.n <-  apply(params,MARGIN = 1, function(x){ 1 + sum(x <  param.vector)})
+    #print(length(ranks.n))
+    #print(dim(ranks))
+    #print(ranks.n)
+    ranks.n
   }
   list(rank =ranks,thin = thins)
 }
