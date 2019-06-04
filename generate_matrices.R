@@ -9,25 +9,20 @@ N <- 10000 #individuals
 B <- 4  #number of blocks
 require(corrplot)
 source('./generateCorrelation.R')
-file.path <- '/scratch/cluster/monthly/dtrejoba/AsynchronousGibbs/data/'
+file.path <- '/scratch/temporary/dtrejoba/AsynchronousGibbs/data'
 this.seed <- as.numeric(Sys.time())
 set.seed(this.seed)
 save(list = c('M','N','this.seed'), file = paste(file.path,'Rmatrices.params.RData',sep=''))
 
 #random matrix with high correlations
 tempjob1 <- function(){source('./generateCorrelation.R',local=T)
-    Rrandom10k50ka0.001 <- generateCorrelationMatrix(M,"random",alphad=0.001)
-    save( list = 'Rrandom10k50ka0.001', file = paste(file.path,'Rrandom10k50ka0.001.RData', sep = '') )
-    rm(Rrandom10k50ka0.001)
+    Rcpp::sourceCpp('generateRandomCor.cpp')
+    Rrandom10k50k <- generateRandomCorL(M,"random")
+    save( list = 'Rrandom10k50k', file = paste(file.path,'Rrandom10k50k.RData', sep = '') )
+    rm(Rrandom10k50k)
     gc()
-    print("matrix Rrandom10k50ka0.001 generated and saved")
+    print("matrix Rrandom10k50k generated and saved")
 }
-#May be to heavy to generate many matrices
-#random matrix with uniformly distributed correlations
-#Rrandom10k50ka1 <- generateCorrelationMatrix(M,"random",alphad=1)
-#save( list = 'Rrandom10k50ka1', file = paste(file.path,'Rrandom10k50ka1.RData', sep = '') )
-#rm(Rrandom10k50ka1)
-#gc()
 
 #AR matrix with 0.5 phi 
 tempjob2 <- function(){source('./generateCorrelation.R',local=T)
