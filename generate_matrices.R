@@ -17,7 +17,7 @@ save(list = c('M','N','this.seed'), file = paste(file.path,'Rmatrices.params.RDa
 #random matrix with high correlations
 tempjob1 <- function(){source('./generateCorrelation.R',local=T)
     Rcpp::sourceCpp('generateRandomCor.cpp')
-    Rrandom10k50k <- generateRandomCorL(M,"random")
+    Rrandom10k50k <- generateRandomCorL(M)
     save( list = 'Rrandom10k50k', file = paste(file.path,'Rrandom10k50k.RData', sep = '') )
     rm(Rrandom10k50k)
     gc()
@@ -70,4 +70,6 @@ temp.list <- lapply(ls(pattern="temp"),get)
 
 functionlist<- c("tempjob5","tempjob4","tempjob3","tempjob2","tempjob1")
 clusterExport(cl,c(functionlist,'M','B'),env=environment())
-lapply(functionlist,function(x){eval(call(x))})
+#lapply(functionlist,function(x){eval(call(x))})
+
+eval(call("tempjob1"))
