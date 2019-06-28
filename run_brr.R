@@ -1,10 +1,10 @@
 ####functions to read data from csv and run brr 
-data.path <- "/scratch/temporary/dtrejoba/AsynchronousGibbs/data"
+data.path <- "/scratch/temporary/dtrejoba/AsynchronousGibbs/data/1k5k"
 brr.path  <- "/home/dtrejoba/repo/BRR-build/src/brr"
 output.path <- ""
 
 
-brr.preprocess.command <- "--preprocess --preprocess-chunks 10 --thread 2 --thread-spawned 2 --preload"
+brr.preprocess.command <- "--preprocess --preprocess-chunks 10 --thread 2 --thread-spawned 2 "
 brr.sync.command <- "--analysis-type ppbayes" 
 brr.async.command <- "--analysis-type asyncppbayes"
 brr.chain.command <- "--chain-length 10000 --burn-in 5000 --thin 5 --thread 12 --thread-spawned 12 --S 0.001,0.01,0.1"
