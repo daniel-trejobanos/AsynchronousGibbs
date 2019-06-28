@@ -78,8 +78,8 @@ data.sets
 apply(data.sets,MARGIN=1,FUN=function(x){brr.preprocess(x[2],x[1])})
 
 #we run brr
-n.chains <- 1
-chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
+n.chains <- 4
+chain.commands.sync <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
      sapply(n.chains,function(y){
          m.name <- basename(x[1])
          m.name <- strsplit(m.name,split = "X.csv")[[1]][1]
@@ -90,7 +90,7 @@ chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
                                  x[1]
                                )
                              )
-                          , "/", m.name,"_C",as.integer(y)
+                          , "/", m.name,"_sync_C",as.integer(y)
                          ) , collapse = ''
                      )
          print(output)
@@ -98,7 +98,7 @@ chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
      })  
 })
 
-chain.commands.async <- apply(data.sets, MARGIN=1, FUN = function(x) {
+chain.commands.async <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
      lapply(n.chains,function(y){
          m.name <- basename(x[1])
          m.name <- strsplit(m.name,split = "X.csv")[[1]][1]
@@ -109,7 +109,7 @@ chain.commands.async <- apply(data.sets, MARGIN=1, FUN = function(x) {
                                  x[1]
                                )
                              )
-                          , "/", m.name,"_C",as.integer(y)
+                          , "/", m.name,"async_C",as.integer(y)
                          ) , collapse = ''
                      )
          print(output)
