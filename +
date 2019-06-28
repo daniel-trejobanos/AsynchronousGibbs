@@ -1,0 +1,18 @@
+finished script to run brr
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Committer: Daniel Trejo banos <dtrejoba@dbc-serv02.vital-it.ch>
+#
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	new file:   generateRandomCor.m
+#	modified:   generate_matrices.R
+#	modified:   generate_phenotypes.R
+#	new file:   generate_random_cor.R
+#	new file:   generate_random_cor.m
+#	new file:   run_brr.R
+#	modified:   sbc.R
+#
