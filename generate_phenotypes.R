@@ -1,11 +1,12 @@
-N <- 10000 #number of individuals
-M <- c(600,300,100 )  # effect sizes mixtures elements, 1000 causals
+N <- 1000 #number of individuals
+M <- c(60,30,10 )  # effect sizes mixtures elements, 100 causals
 P <- c(0.3,0.1,0.1)  # effect siyes mixtures Variance explained totaling 0.5
-data.path <-  '/scratch/temporary/dtrejoba/AsynchronousGibbs'
+data.path <-  '/scratch/temporary/dtrejoba/AsynchronousGibbs/data/1k5k'
 #we generate the covariate matrix fo r the first RAR matrix
 require(mvnfast)
 
-corrMatrices <- list.files(path=data.path,full.names=T,pattern="dataRAR|dataRrandom",include.dirs=T)
+corrMatrices <- list.files(path=data.path,full.names=T,pattern="RAR|Rrandom",include.dirs=T)
+corrMatrices <- corrMatrices[!grepl("_",corrMatrices)]
 print("reading list of correlation matrices")
 print(corrMatrices)
 
