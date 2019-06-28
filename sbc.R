@@ -45,15 +45,16 @@ sbc <- function(X,num.params,sbc.sweeps,init.thin,posterior.draws,max.thin,targe
     }
     thins[n] <- thin
     ##for now without the pi
-    params <- param.family(C,"sigma|beta")
-    param.vector <- c(b,sigmaE,sigmaG)
+    #params <- param.family(C,"sigma|beta")
+    #param.vector <- c(b,sigmaE,sigmaG)
+   # save(list= list()
     #print(param.vector)
     #print(dim(params))
-    ranks.n <-  apply(params,MARGIN = 1, function(x){ 1 + sum(x <  param.vector)})
+    #ranks.n <-  apply(params,MARGIN = 1, function(x){ 1 + sum(x <  param.vector)})
     #print(length(ranks.n))
     #print(dim(ranks))
     #print(ranks.n)
-    ranks.n
+    thin
   }
   list(rank =ranks,thin = thins)
 }

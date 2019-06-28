@@ -1,34 +1,41 @@
 N <- 10000 #number of individuals
-M <- c(600,300,100 )
+M <- c(600,300,100 )  # effect sizes mixtures elements, 1000 causals
+P <- c(0.3,0.1,0.1)  # effect siyes mixtures Variance explained totaling 0.5
 data.path <-  '/scratch/temporary/dtrejoba/AsynchronousGibbs'
 #we generate the covariate matrix fo r the first RAR matrix
 require(mvnfast)
 
-corrMatrices <- list.files(path=data.path,full.names=T,pattern="*10k50k*")
+corrMatrices <- list.files(path=data.path,full.names=T,pattern="dataRAR|dataRrandom",include.dirs=T)
 print("reading list of correlation matrices")
 print(corrMatrices)
 
-create.x.matrix <- function( corr.matrix ){
-	mvnfast::rmvn(N, mu = rep(0, ncol(corr.matrix)),sigma = corr.matrix , ncores=10)
+create.x.matrix <- function( matrix.name, corr.matrix ){
+    if(grepl("random",matrix.name)){
+        print("generating design matrix from the Cholesky factor")
+	mvnfast::rmvn(N, mu = rep(0, ncol(corr.matrix)),sigma = corr.matrix , isChol=T, ncores=10)
+    }
+    else{
+        print("generating design matrix from the covariance matrix")
+        mvnfast::rmvn(N, mu = rep(0, ncol(corr.matrix)),sigma = corr.matrix , isChol=F, ncores=10)
+    }
 }
 
-create.b.matrix <- function( x.matrix, name=NULL){
-       if( length(grep( "RARb" ,name) ) ==0 ){
-            B <- rep(0,ncol(x.matrix ))
-            coefficients <- sample(1:ncol(x.matrix),size = sum(M) )
-            comps <- list()
-            for(i in 1: length(M)){
-                tmp <- sample(coefficients,size = M[i])
-                comps <- append(comps,list(tmp))
-                coefficients <-  setdiff(coefficients,comps[[i]])
-            }
-            
-                
-       }#special case for the block matrix
-       else{
-           load()
+create.b.matrix <- function( x.matrix, name){
+       B <- rep(0,ncol(x.matrix ))
+       comps <- list()
+       
+       print("generating coefficients for non-block matrix")
+          
+       coefficients <- sample(1:ncol(x.matrix),size = sum(M) )
+           
+       for(i in 1: length(M)){
+           tmp <- sample(coefficients,size = M[i])
+           comps <- append(comps,list(tmp))
+           B[tmp] <- rnorm(length(tmp),sd = sqrt(P[i]/M[i]))
+           coefficients <-  setdiff(coefficients,comps[[i]])
        }
-       list(coeff = , comp = )
+                
+       list(coeff = B , comp = comps )
 }
 
 gen_lm <- function(matrixName){
@@ -36,22 +43,26 @@ gen_lm <- function(matrixName){
         print("generating linear model for matrix :")
         print(corr.matrix)
         print("generating design matrix X")
-	X <- create.x.matrix(get(corr.matrix))
+	X <- create.x.matrix(corr.matrix,get(corr.matrix))
         print("generating beta coefficients")
 	beta <- create.b.matrix(X,corr.matrix)
+        
         b <- beta$coeff
-        print("generating i.i.d noise")
-        e <- rnorm(N,sqrt(0.5))
+       
         print("building linear model")
-        g <- X %*% b$coeff
+        g <- scale(X) %*% b
+
+        print("generating i.i.d noise")
+        e <- rnorm(N,sd(g))
+
         y <- g + e
         var.y <- var(y)
         var.g <- var(g)
         var.e <- var(e)
-        coeff.comp <- b$comp
+        coeff.comp <- beta$comp
         variables <- c('X','b','e','y','var.y','var.g','var.e','coeff.comp')
         print("saving linear model")
-        dest.file <- paste(data.path,paste(matrixName,"_linear_model.RData",sep=""),sep = "" )
+        dest.file <- paste(data.path,paste("/",paste(corr.matrix,"_linear_model.RData",sep=""),sep = "" ),sep="")
         save(list=variables,file=dest.file)
         print("linear model saved in ")
         print(dest.file)
