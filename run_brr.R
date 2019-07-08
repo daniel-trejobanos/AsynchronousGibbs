@@ -1,5 +1,6 @@
 ####functions to read data from csv and run brr 
-data.path <- "/scratch/temporary/dtrejoba/AsynchronousGibbs/data/1k5k"
+args = commandArgs(trailingOnly=TRUE)
+data.path <- paste("/scratch/temporary/dtrejoba/AsynchronousGibbs/data/",args[1],sep="")
 brr.path  <- "/home/dtrejoba/repo/BRR-build/src/brr"
 output.path <- ""
 
@@ -7,8 +8,11 @@ output.path <- ""
 brr.preprocess.command <- "--preprocess --preprocess-chunks 10 --thread 2 --thread-spawned 2 "
 brr.sync.command <- "--analysis-type ppbayes" 
 brr.async.command <- "--analysis-type asyncppbayes"
-brr.chain.command <- "--chain-length 10000 --burn-in 5000 --thin 5 --thread 12 --thread-spawned 12 --S 0.001,0.01,0.1"
-
+if(grepl(args[1],"1k")){
+     brr.chain.command <- "--chain-length 20000 --burn-in 10000 --thin 10 --thread 12 --thread-spawned 12 --decompression-tokens 10 --analysis-tokens 10 --S 0.01,0.1"
+}else{
+    brr.chain.command <- "--chain-length 20000 --burn-in 10000 --thin 10 --thread 12 --thread-spawned 12 --decompression-tokens 10 --analysis-tokens 10 --S 0.001,0.01,0.1"
+}
 phenotype.command <- function(pheno.path){paste("--pheno",pheno.path)}
 data.command <- function(data.path){paste("--data-file",data.path)}
 brr.output <- function(output.path){paste("--mcmc-samples",output.path)}
@@ -78,8 +82,9 @@ data.sets
 apply(data.sets,MARGIN=1,FUN=function(x){brr.preprocess(x[2],x[1])})
 
 #we run brr
-n.chains <- 4
-chain.commands.sync <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
+n.chains <- 1:4
+clusterExport(cl,varlist = ls() , envir= .GlobalEnv) 
+chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
      sapply(n.chains,function(y){
          m.name <- basename(x[1])
          m.name <- strsplit(m.name,split = "X.csv")[[1]][1]
@@ -98,7 +103,7 @@ chain.commands.sync <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
      })  
 })
 
-chain.commands.async <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
+chain.commands.async <- apply(data.sets, MARGIN=1, FUN = function(x) {
      lapply(n.chains,function(y){
          m.name <- basename(x[1])
          m.name <- strsplit(m.name,split = "X.csv")[[1]][1]
@@ -109,7 +114,7 @@ chain.commands.async <- parApply(cl,data.sets, MARGIN=1, FUN = function(x) {
                                  x[1]
                                )
                              )
-                          , "/", m.name,"async_C",as.integer(y)
+                          , "/", m.name,"_async_C",as.integer(y)
                          ) , collapse = ''
                      )
          print(output)
