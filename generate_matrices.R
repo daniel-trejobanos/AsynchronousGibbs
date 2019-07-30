@@ -1,9 +1,13 @@
 #Generating the correlation matrices
-#
-
-M <- 5000 #covariates
-N <- 1000 #individuals
-B <- 50  #number of blocks
+# if dimension is above 1000 then the directory created will have the name 1k
+args <- commandArgs(trailingOnly=TRUE)
+print(args)
+print(length(args))
+if(length(args) != 3)
+    stop("Error: three arguments are required, number of individuals and number of covariates and number of blocks for block matrix")
+M <- as.integer(args[2]) #covariates
+N <- as.integer(args[1]) #individuals
+B <- as.integer(args[3])  #number of blocks
 
 prefix.k <- function(num) {
     pre <- as.character(ceiling(num/1000))
@@ -142,6 +146,4 @@ functionlist<- c("tempjob5","tempjob4","tempjob3","tempjob2","tempjob1")
 #clusterExport(cl,c(functionlist,'M','B'),env=environment())
 lapply(functionlist,function(x){eval(call(x))})
 
- #eval(call("tempjob1"))
-###eval(call("tempjob4"))
-#eval(call("tempjob5"))
+ 
