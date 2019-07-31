@@ -351,6 +351,8 @@ ggsave("testplot6.pdf",p)
 speed.files.path <- "/scratch/temporary/dtrejoba/AsynchronousGibbs"
 speed.files <- list.files(speed.files.path,pattern ="speed",full.names =T)
 
+figure.path <- "./PenReg_DiscPrior_Resid_Async/figures/"
+
 get.times  <- function(x){
    sync <- system(paste( c("grep typeppbayes -A1022", x),collapse =" "),intern =T)
    fils  <- sync
@@ -432,4 +434,4 @@ t.q <- single.speedup %>%
     facet_grid(rows =vars(size),cols = vars(phenotype)) +
     scale_shape_manual(c(3,4))
 
-ggsave("test_single_speedup_par.pdf",t.q)
+ggsave(paste0(figure.path,"single_speedup_par.pdf"),t.q)

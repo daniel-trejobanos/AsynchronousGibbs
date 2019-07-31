@@ -1,0 +1,3 @@
+[submodule "PenReg_DiscPrior_Resid_Async"]
+	path = PenReg_DiscPrior_Resid_Async
+	url = https://github.com/daniel-trejobanos/PenReg_DiscPrior_Resid_Async.git
