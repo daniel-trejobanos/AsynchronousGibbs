@@ -386,52 +386,47 @@ get.times  <- function(x){
 
 execution.times <- lapply(speed.files,get.times)
 execution.times[[length(execution.times)]]<- NULL
-all.times <- do.call(rbind,execution.times)
 
+
+all.times <- do.call(rbind,execution.times)
 all.times <- all.times %>% mutate(covariance = str_sub(covariance,1,4))
 all.times <- all.times %>% mutate(covariance = ifelse(covariance == "RAR1", "RAR",covariance))
 all.times <- all.times %>% mutate(covariance = ifelse(covariance == "RAR2", "RAR",covariance))
 all.times <- all.times %>% separate(experiment,into = c("size", "parallelism"), sep = "speed" )
-
 all.times <- all.times %>% na.omit()
 
 
-p <- ggplot() + geom_histogram(all.times,mapping=aes(x=iter.times_sync, fill = experiment, alpha =0.2 ))
-q <-  ggplot() + geom_histogram(all.times,mapping=aes(x=iter.times_async, fill = experiment, alpha =0.2 ))
-library(gridExtra)
 
-ggsave("test_times_sync.pdf",p)
-ggsave("test_times_async.pdf",q)
+mean.times <- all.times %>% group_by(size, parallelism,covariance, phenotype) %>%
+    summarise(mean_sync= mean(iter.times_sync), mean_async = mean(iter.times_async))
 
-r <- ggplot() + geom_histogram(all.times, mapping =aes(x=iter.times_sync/iter.times_async,fill = experiment, alpha =0.2))
-ggsave("test_times_speedup.pdf",r)
+speed.ups <- mean.times %>%
+    mutate(speed_up = mean_sync / mean_async)
 
-#this plot is cool but it may be better to plot mean iteration times.
-s <- all.times %>% ggplot(aes(x=iter.times_sync / iter.times_async, fill = parallelism)) + geom_histogram(aes(y=0.5*..density..),binwidth=0.5) + facet_grid(cols = vars(size), rows=vars(covariance))+geom_vline(xintercept = 1)
-ggsave("test_times_speedup_par.pdf",s)
-
-
-
- mean.times <- all.times %>% group_by(size, parallelism,covariance, phenotype) %>% summarise(mean_sync= mean(iter.times_sync), mean_async = mean(iter.times_async))
-
-speed.ups <- mean.times %>% mutate(speed_up = mean_sync / mean_async)
-
-t.p <-  speed.ups %>% ggplot(aes(x= covariance, y = speed_up ,colour = parallelism)) + geom_point() + facet_grid( rows = vars(size) )
-ggsave("test_mean_speedup_par.pdf",t.p)
-
-single.threaded <- all.times %>% group_by(size,covariance,phenotype) %>%  summarise(single.thread = mean(iter.times_sync[parallelism =="_1_1_1_1"]))
+single.threaded <- all.times %>%
+    group_by(size,covariance,phenotype) %>%
+    summarise(single.thread = mean(iter.times_sync[parallelism =="_1_1_1_1"]))
 
 single.speedup <- mean.times %>%
     inner_join(single.threaded) %>%
     mutate(sync = ( single.thread /mean_sync) ,async = (single.thread/mean_async )) %>%
-    gather(type, speed.up, c(sync,async))
+    gather(type, speed.up, c(sync,async)) %>%
+
 
 
 #this is the good plot !
-t.q <- single.speedup %>%
+
+t.q  <-single.speedup %>%
     ggplot(aes(x = covariance, y = speed.up, colour =parallelism, shape =type)) +
+      geom_hline(yintercept = 1) +
+     scale_shape_manual(values= c(3,4)) +
     geom_point() +
-    facet_grid(rows =vars(size),cols = vars(phenotype)) +
-    scale_shape_manual(c(3,4))
+    #scale_color_grey() +
+    facet_grid(rows =vars(size),cols = vars(phenotype))+
+    theme_bw() +
+     theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+           panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))
+
 
 ggsave(paste0(figure.path,"single_speedup_par.pdf"),t.q)
+
