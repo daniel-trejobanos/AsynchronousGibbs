@@ -156,7 +156,7 @@ chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
                              args[2],
                              "_p",
                              args[3]
-                         ) , Collapse = ''
+                         ) , collapse = ''
                      )
          print(output)
          brr.sync(x[2],x[1],output)
