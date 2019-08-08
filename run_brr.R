@@ -153,8 +153,10 @@ chain.commands.sync <- apply(data.sets, MARGIN=1, FUN = function(x) {
                              "_sync_C",
                              as.integer(y),
                              "_",
-                             args[2]
-                         ) , collapse = ''
+                             args[2],
+                             "_p",
+                             args[3]
+                         ) , Collapse = ''
                      )
          print(output)
          brr.sync(x[2],x[1],output)
@@ -176,7 +178,9 @@ chain.commands.async <- apply(data.sets, MARGIN=1, FUN = function(x) {
                  "_async_C",
                  as.integer(y),
                  "_",
-                 args[2]
+                 args[2],
+                 "_p",
+                 args[3]
              ) , collapse = ''
          )
          print(output)
